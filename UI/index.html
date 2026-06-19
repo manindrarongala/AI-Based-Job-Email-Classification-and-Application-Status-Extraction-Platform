@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An AI-powered job application email classifier that scans your inbox and categorizes emails.">
+    <title>CareerRadar AI | Job Email Classifier</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-layout">
+        
+        <!-- Main Workspace (Left & Center Area) -->
+        <div class="main-workspace">
+            
+            <!-- Credentials Section (Top) -->
+            <section class="credentials-section">
+                <!-- Credentials Card -->
+                <div class="glass-card credential-card">
+                    <div class="card-header">
+                        <div class="card-header-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h2>Secure Connection</h2>
+                    </div>
+                    <p class="card-subtitle">Connect your Gmail account to scan recent messages</p>
+                    
+                    <form id="emailForm" class="premium-form">
+                        <div class="form-group">
+                            <label for="email">Gmail Address</label>
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-envelope input-icon"></i>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    placeholder="name@gmail.com" 
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appPassword">App Password</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-key input-icon"></i>
+                                <input 
+                                    type="password" 
+                                    id="appPassword" 
+                                    placeholder="•••• •••• •••• ••••" 
+                                    required
+                                >
+                                <button type="button" id="togglePassword" class="password-toggle-btn" aria-label="Toggle Password Visibility">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                            <span class="helper-text-hint">Requires a 16-character Google App Password</span>
+                        </div>
+
+                        <button type="submit" class="btn-scan" id="scanBtn">
+                            <span class="btn-text"><i class="fa-solid fa-satellite-dish"></i> Scan Inbox</span>
+                            <span class="btn-loader-text" style="display: none;"><i class="fa-solid fa-circle-notch fa-spin"></i> Categorizing...</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- App Password Guide Accordion -->
+                <div class="glass-card help-card">
+                    <div class="accordion-header" id="helpAccordionHeader">
+                        <div class="card-header-small">
+                            <div class="card-header-icon-small"><i class="fa-regular fa-circle-question"></i></div>
+                            <h3>Need an App Password?</h3>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                    </div>
+                    
+                    <div class="accordion-content" id="helpAccordionContent">
+                        <p class="guide-intro">For security, Gmail requires an App Password rather than your primary password. Here is how to create one in 2 minutes:</p>
+                        <ol class="step-list">
+                            <li>
+                                <span class="step-num">1</span>
+                                <span class="step-desc">Open <a href="https://myaccount.google.com/" target="_blank" rel="noopener">Google Account Settings <i class="fa-solid fa-arrow-up-right-from-square mini-icon"></i></a>.</span>
+                            </li>
+                            <li>
+                                <span class="step-num">2</span>
+                                <span class="step-desc">Search for or navigate to <strong>2-Step Verification</strong> and enable it.</span>
+                            </li>
+                            <li>
+                                <span class="step-num">3</span>
+                                <span class="step-desc">Search for <strong>App passwords</strong> in the search bar.</span>
+                            </li>
+                            <li>
+                                <span class="step-num">4</span>
+                                <span class="step-desc">Enter a name (e.g. <em>CareerRadar</em>) and click <strong>Create</strong>.</span>
+                            </li>
+                            <li>
+                                <span class="step-num">5</span>
+                                <span class="step-desc">Copy the generated <strong>16-character code</strong> and paste it above.</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section (Bottom) -->
+            <section class="workboard">
+                <!-- Welcome/Placeholder State -->
+                <div id="initialState" class="glass-card welcome-card">
+                    <div class="welcome-icon">
+                        <i class="fa-solid fa-inbox"></i>
+                    </div>
+                    <h2>No Inbox Scan Performed</h2>
+                    <p>Enter your Gmail credentials on the left. Our LLaMA 3.1 AI agent will scan emails from the last 24 hours to automatically filter and extract active job applications, interview invites, and status updates.</p>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loadingIndicator" class="glass-card loading-indicator" style="display: none;">
+                    <div class="spinner-container">
+                        <div class="glow-spinner"></div>
+                        <div class="inner-icon"><i class="fa-solid fa-robot"></i></div>
+                    </div>
+                    <h3>Running LLaMA AI Engine</h3>
+                    <p class="loading-subtitle">Accessing Gmail, fetching recent messages, and performing cognitive classification. This may take up to a minute depending on your inbox volume...</p>
+                    <div class="progress-bar-placeholder">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="errorMessage" class="glass-card error-card" style="display: none;">
+                    <div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="error-details">
+                        <h3>Connection or Scan Failed</h3>
+                        <p id="errorText">Failed to scan emails. Please check your credentials and try again.</p>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="results-container" style="display: none;">
+                    <!-- Metrics Row -->
+                    <div class="stats-row">
+                        <div class="glass-card stat-card" id="totalMailsCard">
+                            <div class="stat-icon-wrapper blue-glow">
+                                <i class="fa-solid fa-envelope-open-text"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Scanned</span>
+                                <span class="stat-value" id="totalEmails">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card stat-card" id="jobMailsCard">
+                            <div class="stat-icon-wrapper purple-glow">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Job Related</span>
+                                <span class="stat-value highlight" id="jobEmailCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- List Title -->
+                    <div class="results-header">
+                        <h2>Classified Job Opportunities</h2>
+                        <span class="time-filter-badge"><i class="fa-regular fa-clock"></i> Last 24 Hours</span>
+                    </div>
+                    
+                    <!-- Job Emails List -->
+                    <div id="jobEmailsList" class="job-emails-list">
+                        <!-- Dynamic content loaded from script.js -->
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Vertical Navigation Bar (Right Side) -->
+        <aside class="right-navbar" id="rightNavbar">
+            <div class="navbar-brand-wrapper">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h1 class="brand-name">CareerRadar <span class="brand-highlight">AI</span></h1>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="status-indicator" id="backendStatus">
+                <span class="pulse-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav">
+                <ul class="nav-links">
+                    <li class="active">
+                        <a href="#emailForm" class="nav-link">
+                            <i class="fa-solid fa-satellite-dish nav-icon"></i>
+                            <span class="nav-label">Scan Inbox</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="http://localhost:8000/docs" target="_blank" rel="noopener" class="nav-link">
+                            <i class="fa-solid fa-book nav-icon"></i>
+                            <span class="nav-label">API Reference</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://myaccount.google.com/" target="_blank" rel="noopener" class="nav-link">
+                            <i class="fa-solid fa-key nav-icon"></i>
+                            <span class="nav-label">Google Account</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="version-tag">v1.2.0-beta</div>
+                <div class="system-time">AI Classifier</div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Email Details Modal Drawer -->
+    <div id="emailModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalSubject">
+        <div class="modal-card glass-modal">
+            <button class="modal-close-btn" id="modalClose" aria-label="Close modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="modal-header">
+                <div class="modal-badge-row">
+                    <span class="modal-badge-tag"><i class="fa-solid fa-circle-check"></i> Job Related</span>
+                    <span id="modalStatus" class="status-badge unknown">Unknown</span>
+                </div>
+                <h2 id="modalSubject">Subject Placeholder</h2>
+            </div>
+            
+            <div class="modal-meta-grid">
+                <div class="modal-meta-item">
+                    <span class="meta-label"><i class="fa-solid fa-building"></i> Company</span>
+                    <span id="modalCompany" class="meta-value">-</span>
+                </div>
+                <div class="modal-meta-item">
+                    <span class="meta-label"><i class="fa-solid fa-id-badge"></i> Role</span>
+                    <span id="modalRole" class="meta-value">-</span>
+                </div>
+            </div>
+
+            <div class="modal-body-wrapper">
+                <div class="modal-body-header">
+                    <span><i class="fa-solid fa-align-left"></i> Cleaned Message Body</span>
+                    <button class="btn-copy-body" id="btnCopyBody" title="Copy Body Text">
+                        <i class="fa-regular fa-copy"></i> Copy Body
+                    </button>
+                </div>
+                <div class="modal-body-content" id="modalBody">
+                    <!-- Dynamic Body Text -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Entrypoint -->
+    <script src="script.js"></script>
+</body>
+</html>
