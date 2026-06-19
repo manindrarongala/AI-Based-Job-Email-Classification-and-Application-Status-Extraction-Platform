@@ -1,5 +1,5 @@
 // API configuration
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = 'https://career-radar.onrender.com';
 const API_URL = `${BACKEND_URL}/api/scan-emails`;
 
 // Global State
